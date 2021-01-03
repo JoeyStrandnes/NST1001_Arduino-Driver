@@ -1,26 +1,28 @@
 /*ToDo: 
  * Add Pulldown mode and "Multicast" mode
+ * Shorten the wait time during conversion and transmission. 
  */
 #include "NST1001_Driver.h"
 
-//Pullup mode = 0, Pulldown mode = 1, Multicast = 2
-//static uint8_t NST_Mode; // Mode select
-
-
-/*  Setup timer-counter 1/16-bit timer  
- *  Maximum number of pulses = 3201 => 150 degrees celsius
- */
 
 NST1001::NST1001(){
+
+  
+
   
 }
  
-const void NST1001::init(uint8_t const Enable_Pin, uint8_t const Temp_Unit){
+const void NST1001::init(int const Enable_Pin, int const Temp_Unit){
+/*  Setup timer-counter 1/16-bit timer  
+ *  Maximum number of pulses = 3201 => 150 degrees celsius
+*/
   
   cli();
   EN_Pin = Enable_Pin;
+  Unit   = Temp_Unit;
+
   
-  pinMode(Enable_Pin, OUTPUT);
+  pinMode(EN_Pin, OUTPUT);
   
 //Timer 1 Normal mode with falling edge as clock source and noise suppression
   TCCR1A = (0<<COM1A1)|(0<<COM1A0)|(0<<COM1B1)|(0<<COM1B0)|(0<<WGM11)|(0<<WGM10);
@@ -39,7 +41,7 @@ const float NST1001::getTemp(){
   digitalWrite(EN_Pin, HIGH);
 
   TCNT1 = 0;                            // Reset counter value
-  _delay_ms(50);                        // Conversion + transmission delay
+  _delay_ms(50);                        // Conversion + transmission delay (Longest possible time)
   Temp = ((TCNT1*0.0625) - 50.0625);    // Calculate temperature from sampled pulses
 
   digitalWrite(EN_Pin, LOW);
@@ -51,15 +53,15 @@ const float NST1001::getTemp(){
   else if (100 < Temp && Temp < 150){
     Temp += ((100-Temp)*0.012);         // Compensatio for 100 < T < 150
   }
-  else if(Temp < -50 || Temp > 150 || Temp_Unit > 2){    // Sanity check, returns "huge" value
+  else if(Temp < -50 || Temp > 150 || Unit > 2){    // Sanity check, returns "huge" value
     Temp = 32500;
   }
 
-//Changing uint, defaults to Celsius: 1 = Fahrenheit, 2 = Kelvin
-  if(Temp_Unit == 1){
+//Changing uint, defaults to Celsius (0): 1 = Fahrenheit, 2 = Kelvin
+  if(Unit == 1){
     Temp = ((Temp*1.8)+32);
   }
-  else if(Temp_Unit == 2){
+  else if(Unit == 2){
     Temp += 273.15;
   }
   return Temp;

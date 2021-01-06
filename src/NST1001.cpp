@@ -1,13 +1,11 @@
 /*ToDo: 
  * Add Pulldown mode and "Multicast" mode
  */
-#include "NST1001_Driver.h"
-
-
+#include "NST1001.h"
 
 NST1001::NST1001(int const Enable_Pin, char const Temp_Unit): EN_Pin{Enable_Pin}, Unit{Temp_Unit}{
 /* No idea why this doesnt work...
-#if Temp_Unit != 'C'// || Temp_Unit != 'K' || Temp_Unit != 'F')
+#if Temp_Unit != 'C' || Temp_Unit != 'K' || Temp_Unit != 'F')
 #error "Incorrect unit input. Only C, K and F are allowed"
 #endif  
 */
@@ -77,7 +75,7 @@ const float NST1001::getTemp(){
       Temp += ((100-Temp)*0.012);         // Compensation for 100 < T < 150
     }
     
-    //Changing unit, defaults to Celsius (0): 1 = Fahrenheit, 2 = Kelvin
+    //Changing unit, defaults to Celsius (C): F = Fahrenheit, K = Kelvin
     if(Unit == 'F'){
       Temp = ((Temp*1.8)+32);
     }

@@ -4,18 +4,21 @@
 #include "NST1001_Driver.h"
 
 
-//Will declare varibles in constructor...
-NST1001::NST1001(){
+
+NST1001::NST1001(int const Enable_Pin, char const Temp_Unit): EN_Pin{Enable_Pin}, Unit{Temp_Unit}{
+/* No idea why this doesnt work...
+#if Temp_Unit != 'C'// || Temp_Unit != 'K' || Temp_Unit != 'F')
+#error "Incorrect unit input. Only C, K and F are allowed"
+#endif  
+*/
 }
 
-const void NST1001::init(int const Enable_Pin, int const Temp_Unit){
+const void NST1001::init(){
 /*  Setup timer-counter 1/16-bit timer  
  *  Maximum number of pulses = 3201 => 150 degrees celsius
  */
   cli();
-  EN_Pin = Enable_Pin;
-  Unit   = Temp_Unit;
-
+  
   pinMode(EN_Pin, OUTPUT);
   
 //Timer 1 Normal mode with falling edge as clock source. Most code below is unnecessary, it is for clarification.
@@ -59,7 +62,7 @@ const float NST1001::getTemp(){
     }
   }
 
-  if(TCNT1 < 1 || TCNT1 > 3201 || Unit > 2 || Fault == true){// Sanity check, returns "huge" value
+  if(TCNT1 < 1 || TCNT1 > 3201 || Fault == true){// Sanity check, returns "huge" value
     Temp = 1000;
   }
   else{
@@ -75,10 +78,10 @@ const float NST1001::getTemp(){
     }
     
     //Changing unit, defaults to Celsius (0): 1 = Fahrenheit, 2 = Kelvin
-    if(Unit == 1){
+    if(Unit == 'F'){
       Temp = ((Temp*1.8)+32);
     }
-    else if(Unit == 2){
+    else if(Unit == 'K'){
       Temp += 273.15;
       }
     }

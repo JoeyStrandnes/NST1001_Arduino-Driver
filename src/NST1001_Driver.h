@@ -7,13 +7,14 @@
 class NST1001{
 
   public:
-    NST1001();
-    const void  init(int const Enable_Pin, int const Temp_Unit = 0);
+    NST1001(int const Enable_Pin, char const Temp_Unit = 'C');
+    const void  init();
     const float getTemp();
     
   private:
     int   EN_Pin{};
-    int   Unit{};
+    char  Unit{};
+    //int   Unit{};
     //int MultiModePins[];
     //Multi mode...
 };

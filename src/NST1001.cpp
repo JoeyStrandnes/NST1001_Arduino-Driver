@@ -11,7 +11,7 @@ NST1001::NST1001(int const Enable_Pin, char const Temp_Unit): EN_Pin{Enable_Pin}
 }
 
 //MultiCast Mode
-NST1001::NST1001(int const Pins[], char const Temp_Unit = 'C'):Unit{Temp_Unit}{
+NST1001::NST1001(int const Pins[], char const Temp_Unit):Unit{Temp_Unit}{ //Might be an overlooked bug with "char const Temp_Unit = 'C'"
   
   MultiCast = true;
   
@@ -20,6 +20,14 @@ NST1001::NST1001(int const Pins[], char const Temp_Unit = 'C'):Unit{Temp_Unit}{
     pinMode(MultiCastPins[i], INPUT);   // Set all pins to high impedence. Should default as inputs.
   }
 }
+
+//Freerunning Mode
+NST1001::NST1001(char const Temp_Unit): Unit{Temp_Unit}{
+  Time_Out = 5;
+  Freerunning = true;
+}
+
+
 
 const void NST1001::init(){
 /*  Setup timer-counter 1/16-bit timer  
@@ -43,35 +51,67 @@ const float NST1001::getTemp(int const Index){ // Index is only used in multicas
   
   TCCR1B |= (0<<ICNC1)|(0<<ICES1)|(0<<WGM13)|(0<<WGM12)|(1<<CS12)|(1<<CS11)|(0<<CS10); // Enable counter.
   
-  if(MultiCast == true){                                    //Start sensor
+  //Start sensor, sensor is always on in freerunning mode. 
+  if(MultiCast == true && Freerunning == false){            // Multicast mode                                 
     _delay_ms(5);                                           // Requires some initial delay to settle. Need to look into this.
     pinMode(MultiCastPins[Index], OUTPUT);
   }
-  else{
+  else if(MultiCast == false && Freerunning == false){      // Normal mode
     digitalWrite(EN_Pin, HIGH);
- }
+  }
+
+
+// Freerunning mode requires some sort of sync to the sensor.
+// If checking during transmission, discard transmission and check next. 
+// If no transmission is detected, continue like normally.
+// Time_Out is set to 50us in freerunning mode ~6 pulses. 
 
   TCNT1 = 0;                                                // Reset counter value.
-  
-  for(int i = 0; i < 50; i++){                              // First ~24ms of ADC conversion time. ~50ms timeout, fault is set if reached. Async function.    
-    if (TCNT1 > 0){
-      break;
+  if(Freerunning == false){
+    for(int i = 0; i < Time_Out; i++){                      // First ~24ms of ADC conversion time. ~50ms timeout (Normal/Multicast mode), fault is set if reached. Async function.    
+      if (TCNT1 > 0){
+        break;
+      }
+      else if(TCNT1 == 0 && i == (Time_Out-1)){
+        Fault = true;
+      }
+      _delay_us(10);
     }
-    else if(TCNT1 == 0 && i == 49){
-      Fault = true;
+  }
+
+  if(Freerunning == true && Fault == false){                //Condition is met if a transmission was detected.
+    
+    while(1){
+      Temp = TCNT1;
+      _delay_us(11);
+      if(Temp == TCNT1 || TCNT1 >= 3201){                   // If transmission has stopped. 
+        TCNT1 = 0;                                          // Set counter to zero.      
+        break;
+      }
     }
-    _delay_ms(1);
+
+    //Now we need to wait for 24ms.
+    for(int i = 0; i < 50; i++){
+      if (TCNT1 > 0){
+        break;
+      }
+      else if(TCNT1 == 0 && i == 49){
+        Fault = true;
+      }
+      _delay_ms(1);
+    }
   }
   
+
   while(1){                                                 // Rest of the unknown transmission time. A 11 micro-second delay is longest possible pulse time.
     Temp = TCNT1;
     _delay_us(11);  
     if(Temp == TCNT1 || TCNT1 >= 3201 || Fault == true){    // Check if transmission is finished by checking if the pulse train has stopped, reached max or skip if fault is detected.   
       TCCR1B = 0;                                           // Disable counter.
-      if(MultiCast == true){
+      if(MultiCast == true && Freerunning == false){        // Multicast mode  
         pinMode(MultiCastPins[Index], INPUT);
       }
-      else{
+      else if(MultiCast == false && Freerunning == false){  // Normal mode
         digitalWrite(EN_Pin, LOW);
       }        
       break;

@@ -28,6 +28,18 @@
 
 
 
+#### Sensor mode = Free-running(single sensor, no additional GPIO)
+
+| Function              | Parameters | Comment                  | Return type |
+| --------------------- | ---------- | ------------------------ | ----------- |
+| NST1001 (Constructor) | char       | char = C, F or K. (unit) | void        |
+| init                  | -          | Starts timer.            | void        |
+| getTemp               | -          | Returns temperature.     | float       |
+
+
+
+
+
 ### Supported units
 
 - Celsius (default)
@@ -38,9 +50,9 @@
 
 ### Examples with connection diagram
 
-##### [Single sensor example](https://github.com/JoeyStrandnes/NST1001_Arduino-Driver/tree/Dev/examples/Read_Temperature)
+##### [Single sensor example](https://github.com/JoeyStrandnes/NST1001_Arduino-Driver/tree/master/examples/Read_Temperature)
 
-##### [Multicast example](https://github.com/JoeyStrandnes/NST1001_Arduino-Driver/tree/Dev/examples/Read_Temperature_MultiCast)
+##### [Multicast example](https://github.com/JoeyStrandnes/NST1001_Arduino-Driver/tree/master/examples/Read_Temperature_MultiCast)
 
 
 

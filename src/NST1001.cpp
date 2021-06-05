@@ -23,7 +23,6 @@ NST1001::NST1001(int const Pins[], char const Temp_Unit):Unit{Temp_Unit}{ //Migh
 
 //Freerunning Mode
 NST1001::NST1001(char const Temp_Unit): Unit{Temp_Unit}{
-  Time_Out = 5;
   Freerunning = true;
 }
 
@@ -68,18 +67,18 @@ const float NST1001::getTemp(int const Index){ // Index is only used in multicas
 
   TCNT1 = 0;                                                // Reset counter value.
   if(Freerunning == false){
-    for(int i = 0; i < Time_Out; i++){                      // First ~24ms of ADC conversion time. ~50ms timeout (Normal/Multicast mode), fault is set if reached. Async function.    
+    for(int i = 0; i < 50; i++){                            // First ~24ms of ADC conversion time. ~50ms timeout (Normal/Multicast mode), fault is set if reached. Async function.    
       if (TCNT1 > 0){
         break;
       }
-      else if(TCNT1 == 0 && i == (Time_Out-1)){
+      else if(TCNT1 == 0 && i == 49){
         Fault = true;
       }
-      _delay_us(10);
+      _delay_ms(1);
     }
   }
 
-  if(Freerunning == true && Fault == false){                //Condition is met if a transmission was detected.
+  if(Freerunning == true){                             
     
     while(1){
       Temp = TCNT1;

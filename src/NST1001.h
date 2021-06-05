@@ -23,7 +23,6 @@ class NST1001{
     char  Unit{};
     bool  MultiCast{false};
     bool  Freerunning{false};
-    int   Time_Out{5000};
     
     int   MultiCastPins[];
 

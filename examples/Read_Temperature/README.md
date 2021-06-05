@@ -8,8 +8,8 @@
 /* NST1001 read temperature example!
  * The sensor data pin must be connected to pin "T1". Since it uses the 16-bit hardware counter. 
  * T1:UNO   = 5
- * T1:Nano  = 8
- * T1:Micro = 26
+ * T1:Nano  = 5
+ * T1:Mini  = 9
  * 
  * getTemp returns the temperature as a float value.
  * getTemp will return a temperature of 1000 if an error with the sensor occurs.

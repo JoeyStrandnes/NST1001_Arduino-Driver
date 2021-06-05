@@ -52,6 +52,8 @@
 
 ##### [Single sensor example](https://github.com/JoeyStrandnes/NST1001_Arduino-Driver/tree/master/examples/Read_Temperature)
 
+##### [Single sensor example (free-running)](https://github.com/JoeyStrandnes/NST1001_Arduino-Driver/tree/master/examples/Read_Temperature_Free-running)
+
 ##### [Multicast example](https://github.com/JoeyStrandnes/NST1001_Arduino-Driver/tree/master/examples/Read_Temperature_MultiCast)
 
 
